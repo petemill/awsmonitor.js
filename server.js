@@ -47,17 +47,18 @@ app.get('/',function (req, res, next) {
     if (!AWSCredentials) return next(new Error("AWS Credentials not ready. Perhaps they are still being read from disk."));
     
     res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.write('Getfting AS groups...');
+    res.write('Getting AS groups...');
     var as = AWS.createASClient(AWSCredentials.accessKeyId, AWSCredentials.secretAccessKey,{host: "autoscaling.eu-west-1.amazonaws.com"});
     
     //call AWS asynchronously
+    var start = +new Date().getTime();
     as.call("DescribeAutoScalingGroups", {}, function(err, result) {
+        var end = +new Date().getTime();
         if (err) return next (err);
         if (result.Error) return next(result.Error);
-        res.write('/n')
-        res.write('DescribeAutoScalingGroups response:' + result)
-        res.write(JSON.stringify(result));
-        res.end('Hello World fsrom Cloud9\n');
+        res.write('done in ' + (end-start) + 'ms\n');
+        res.write('DescribeAutoScalingGroups response:\n' + result)
+        res.end(JSON.stringify(result));
     });
     
       
