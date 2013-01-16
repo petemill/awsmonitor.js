@@ -28,7 +28,7 @@ app.use(errorHandler);
 
 //start reading our AWS credentials from disk
 console.log('Setting up (reading credentials)...');
-fs.readFile("aws-credentials.json", 'utf-8', function(error, fileContents) {
+fs.readFile("credentials/aws-credentials.json", 'utf-8', function(error, fileContents) {
     if (error) {
         console.log('there was an error reading aws-creds');
         console.log(error);
