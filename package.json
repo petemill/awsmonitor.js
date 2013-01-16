@@ -1,0 +1,10 @@
+{
+  "name": "aws-monitor",
+  "description": "A set of html dashboards for monitoring AWS resources",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "*",
+    "aws-lib": "*"
+  }
+}
