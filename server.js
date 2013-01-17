@@ -5,9 +5,25 @@ var fs = require('fs');
 //we're going to store the AWS credentials for this session in a variable
 var AWSCredentials;
 //use express web framework instead of built-in node.js html http://expressjs.com/guide.html
-var express = require('express');
+var express = require('express'), resource = require('express-resource');
 var app = express();
-app.use(app.router);
+
+//give aws credentials to each request
+app.use(function (req, res, next) {
+    console.log('in set aws creds middleware');
+    if (AWSCredentials)
+    {
+        console.log('using cached aws creds');
+        req.AWSCredentials = AWSCredentials
+        next();
+    }
+    else {
+        readAWSCredentials(function(creds) { req.AWSCredentials = AWSCredentials = creds; next(); });
+    }
+});
+
+//set up controllers
+var autoscale = app.resource('autoscale', require('./controllers/autoscale'));
 
 //define global error handler for web requests
 var errorHandler = function(err, req, res, next) {
@@ -26,42 +42,30 @@ var errorHandler = function(err, req, res, next) {
 };
 app.use(errorHandler);
 
+
+function readAWSCredentials (next) {
 //start reading our AWS credentials from disk
-console.log('Setting up (reading credentials)...');
-fs.readFile("credentials/aws-credentials.json", 'utf-8', function(error, fileContents) {
+console.log('Reading credentials...');
+fs.readFile("./credentials/aws-credentials.json", 'utf-8', function(error, fileContents) {
     if (error) {
         console.log('there was an error reading aws-creds');
         console.log(error);
         throw error;
     }
     console.log('Successfully read creds: ' + fileContents);
-    AWSCredentials = JSON.parse(fileContents);
+    next(JSON.parse(fileContents));
   
 });
+}
 
 //set up routes
 
 //home page gets list of auto-scale groups
 app.get('/',function (req, res, next) {
-    //cannot continue if we don't have any credentials
-    if (!AWSCredentials) return next(new Error("AWS Credentials not ready. Perhaps they are still being read from disk."));
-    
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.write('Getting AS groups...');
-    var as = AWS.createASClient(AWSCredentials.accessKeyId, AWSCredentials.secretAccessKey,{host: "autoscaling.eu-west-1.amazonaws.com"});
-    
-    //call AWS asynchronously
-    var start = +new Date().getTime();
-    as.call("DescribeAutoScalingGroups", {}, function(err, result) {
-        var end = +new Date().getTime();
-        if (err) return next (err);
-        if (result.Error) return next(result.Error);
-        res.write('done in ' + (end-start) + 'ms\n');
-        res.write('DescribeAutoScalingGroups response:\n' + result)
-        res.end(JSON.stringify(result));
-    });
+
+    res.send('hi!');
     
       
-      
     });
+    
     app.listen(process.env.PORT);

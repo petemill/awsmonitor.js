@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "express": "*",
-    "aws-lib": "*"
+    "aws-lib": "*",
+    "express-resource": "*"
   }
 }
